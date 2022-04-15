@@ -11,7 +11,7 @@
   <ul>
     <li><strong>/start</strong> (Greetings from ErgoToolsBot)</li>
     <li><strong>/info</strong> (General information about Ergo's blockchain)</li>
-    <li><strong>/instructions</strong> (General information about Ergo)</li>
+    <li><strong>/instructions</strong> (General information about ErgoToolsBot)</li>
   </ul>
     
 <p>You can send a message to the bot with a valid wallet it shows the amount of tokens and the balance in ERG</p>
