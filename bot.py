@@ -18,7 +18,7 @@ URLHashRate = 'https://api.ergoplatform.com/api/v0/info'
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('*{}*:\n{}'.format('Welcome to ErgoToolsBot ' + str(update.effective_user.first_name),'\n\nThis project is OpenSource https://github.com/ladopixel/ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
-    print('Entro el usuario: ' + update.effective_user.username + ' - Id: ' + str(update.effective_user.id))
+    print('Entro el usuario: ' + str(update.effective_user.username) + ' - Id: ' + str(update.effective_user.id))
     mylcd.lcd_clear()
     mylcd.lcd_display_string('Welcome', 1, 0)
     mylcd.lcd_display_string(str(update.effective_user.username), 2, 0)
@@ -107,16 +107,20 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
         
         # Detect NFT type
         if tokenNFT == '0e020101':
-            urlArchivo = resolveIpfs(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[2:])
+            try:
+                urlArchivo = resolveIpfs(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[2:])
+            except:
+                urlArchivo = 'No URL available in R9'
         elif tokenNFT == '0e020102':
             url1ArchivoAudio = resolveIpfsAudio(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[4:])
             url2ArchivoAudio = resolveIpfsAudio2(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[4:])
         elif tokenNFT == '0e020103':
             urlArchivo = resolveIpfs(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[2:])
         else:
+            urlArchivo = 'No NFT'
             mylcd.lcd_clear()
             mylcd.lcd_display_string('No NFT', 1, 0)
-            urlArchivo = 'No NFT'
+
 
         ############ Muestro el mensaje
         try:
