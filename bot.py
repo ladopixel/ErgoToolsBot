@@ -17,7 +17,7 @@ URLprecio = 'https://api.nanopool.org/v1/ergo/prices'
 URLHashRate = 'https://api.ergoplatform.com/api/v0/info'
 
 def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('*{}*:\n{}'.format('Welcome to ErgoToolsBot ' + str(update.effective_user.first_name),'\n\nThis project is OpenSource https://github.com/ladopixel/ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
+    update.message.reply_text('*{}*:\n{}'.format('Welcome to ErgoToolsBot ' + str(update.effective_user.first_name),'\n\nThis project is OpenSource!'),  parse_mode=ParseMode.MARKDOWN)
     print('Entro el usuario: ' + str(update.effective_user.username) + ' - Id: ' + str(update.effective_user.id))
     mylcd.lcd_clear()
     mylcd.lcd_display_string('Welcome', 1, 0)
@@ -49,7 +49,7 @@ def info(update: Update, context: CallbackContext) -> None:
 
 def instructions(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('*{}*'.format('ℹ️ Instructions ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
-    update.message.reply_text(f'\n\nHi ' + str(update.effective_user.username) + '\nI am gaining knowledge, for the moment you can send me a message with a valid Ergo wallet address or token ID and I will show you some information.')
+    update.message.reply_text(f'\n\nHi ' + str(update.effective_user.username) + '\nI am gaining knowledge.\n\n· You can send me token ID.\n· You can send me wallet address.\n· You can send me the name of the token (not including special characters and case sensitive).\n\nLittle by little I will learn to show new information, stop by to see me another day :)')
     print('User ' + update.effective_user.username + '\nInstructions')
     mylcd.lcd_clear()
     mylcd.lcd_display_string(update.effective_user.username, 1, 0)
@@ -57,7 +57,7 @@ def instructions(update: Update, context: CallbackContext) -> None:
 
 def credits(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('*{}*'.format('ℹ️ Technology used in ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
-    update.message.reply_text(f' · Raspberry Pi 4\n · BotFather Telegram user\n · Python\n · Ergo API Explorer\n')
+    update.message.reply_text(f'· Raspberry Pi 4\n· BotFather Telegram user\n· Python\n· Ergo API Explorer\n· You can see the project in https://github.com/ladopixel/ErgoToolsBot')
 
     print('User ' + update.effective_user.username + '\nCredits')
     mylcd.lcd_clear()
@@ -75,18 +75,12 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
         walletOK = 200
         update.message.reply_text('*{}*'.format('ℹ️ Info Wallet'),  parse_mode=ParseMode.MARKDOWN)
         dataWallet = requests.get('https://api.ergoplatform.com/api/v1/addresses/' + valorIntroducido + '/balance/confirmed')
-        tokenOK = 400
     elif requests.get('https://api.ergoplatform.com/api/v0/assets/' + valorIntroducido + '/issuingBox').status_code == 200:
         tokenOK = 200
-        searchOK = 400
         update.message.reply_text('*{}*'.format('ℹ️ Info Token'),  parse_mode=ParseMode.MARKDOWN)
         dataToken = requests.get('https://api.ergoplatform.com/api/v0/assets/' + valorIntroducido + '/issuingBox')
-        walletOK = 400
-        searchOK = 400
     elif requests.get('https://api.ergoplatform.com/api/v1/tokens/search?query=' + valorIntroducido).status_code == 200:
         dataTokenSearch = requests.get('https://api.ergoplatform.com/api/v1/tokens/search?query=' + valorIntroducido)
-        walletOK = 400
-        tokenOK = 400
         searchOK = 200
         
 
@@ -146,7 +140,11 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
     if searchOK == 200:
         dataTokenSearch = dataTokenSearch.json()
         totalTokenSearch = str(dataTokenSearch['total'])
-        update.message.reply_text('*{}*'.format('ℹ️ There are ' + totalTokenSearch +' tokens with this name'),  parse_mode=ParseMode.MARKDOWN)
+        if totalTokenSearch == 1:
+            update.message.reply_text('*{}*'.format('ℹ️ There are ' + totalTokenSearch +' tokens with this name'),  parse_mode=ParseMode.MARKDOWN)
+        else:
+            update.message.reply_text('*{}*'.format('ℹ️ There are ' + totalTokenSearch +' tokens with this name, try entering the ID.\nTest by entering the ID, the special characters in the name are not detected for the search.'),  parse_mode=ParseMode.MARKDOWN)
+        
         print('User: ' + update.effective_user.username + '\nToken: ' + valorIntroducido)
         mylcd.lcd_clear()
         mylcd.lcd_display_string(update.effective_user.username, 1, 0)
