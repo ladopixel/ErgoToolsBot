@@ -42,33 +42,34 @@ def info(update: Update, context: CallbackContext) -> None:
 
     update.message.reply_text('*{}*'.format('ℹ️ Info Ergo Blockchain'),  parse_mode=ParseMode.MARKDOWN)
     update.message.reply_text('Prices' + '\n' + precioEUR + ' EUR · ' + precioUSD + ' USD ·  ' + precioBTC + ' BTC \nCreation Height: ' + altura + '\nHashrate: ' + hashRate + ' TH/s \nSupply: ' + supply + ' ERG / 97739924 ERG')
-    print('Solicitaron info')
+    print('User ' + update.effective_user.username + '\nInfo')
     mylcd.lcd_clear()
-    mylcd.lcd_display_string('info', 1, 0)
-    mylcd.lcd_display_string(precioEUR + ' EUR', 2, 0)
+    mylcd.lcd_display_string(update.effective_user.username, 1, 0)
+    mylcd.lcd_display_string('Info ' + precioEUR + ' EUR', 2, 0)
 
 def instructions(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('*{}*'.format('ℹ️ Instructions ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
     update.message.reply_text(f'\n\nHi ' + str(update.effective_user.username) + '\nI am gaining knowledge, for the moment you can send me a message with a valid Ergo wallet address or token ID and I will show you some information.')
-    print('Instructions >> ' + update.effective_user.username)
+    print('User ' + update.effective_user.username + '\nInstructions')
     mylcd.lcd_clear()
-    mylcd.lcd_display_string('Instrucciones', 1, 0)
-    mylcd.lcd_display_string(update.effective_user.username, 2, 0)
+    mylcd.lcd_display_string(update.effective_user.username, 1, 0)
+    mylcd.lcd_display_string('Instructions', 2, 0)
 
 def credits(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('*{}*'.format('ℹ️ Technology used in ErgoToolsBot'),  parse_mode=ParseMode.MARKDOWN)
     update.message.reply_text(f' · Raspberry Pi 4\n · BotFather Telegram user\n · Python\n · Ergo API Explorer\n')
 
-    print('Credits >> ' + update.effective_user.username)
+    print('User ' + update.effective_user.username + '\nCredits')
     mylcd.lcd_clear()
-    mylcd.lcd_display_string('Credits', 1, 0)
-    mylcd.lcd_display_string(update.effective_user.username, 2, 0)
+    mylcd.lcd_display_string(update.effective_user.username, 1, 0)
+    mylcd.lcd_display_string('Credits', 2, 0)
 
 def escuchoMensajes(update: Update, context: CallbackContext) -> None:
 
     valorIntroducido = str(update.message.text)
     walletOK = 400
     tokenOK = 400
+    searchOK = 400
     
     if requests.get('https://api.ergoplatform.com/api/v1/addresses/' + valorIntroducido + '/balance/confirmed').status_code == 200:
         walletOK = 200
@@ -77,9 +78,17 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
         tokenOK = 400
     elif requests.get('https://api.ergoplatform.com/api/v0/assets/' + valorIntroducido + '/issuingBox').status_code == 200:
         tokenOK = 200
+        searchOK = 400
         update.message.reply_text('*{}*'.format('ℹ️ Info Token'),  parse_mode=ParseMode.MARKDOWN)
         dataToken = requests.get('https://api.ergoplatform.com/api/v0/assets/' + valorIntroducido + '/issuingBox')
         walletOK = 400
+        searchOK = 400
+    elif requests.get('https://api.ergoplatform.com/api/v1/tokens/search?query=' + valorIntroducido).status_code == 200:
+        dataTokenSearch = requests.get('https://api.ergoplatform.com/api/v1/tokens/search?query=' + valorIntroducido)
+        walletOK = 400
+        tokenOK = 400
+        searchOK = 200
+        
 
     ############ WALLET
     if walletOK == 200:
@@ -88,9 +97,9 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
         totalTokens = str(len(dataWallet['tokens']))
         ############ Muestro el mensaje
         update.message.reply_text(totalWallet + ' ERG\n' + totalTokens + ' tokens')
-        print(totalWallet + '\n' + totalTokens)
+        print('User: ' + update.effective_user.username + '\nWallet: ' + valorIntroducido)
         mylcd.lcd_clear()
-        mylcd.lcd_display_string('Wallet', 1, 0)
+        mylcd.lcd_display_string(update.effective_user.username, 1, 0)
         mylcd.lcd_display_string(valorIntroducido, 2, 0)
     ############ TOKEN
     elif tokenOK == 200:
@@ -118,8 +127,10 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
             urlArchivo = resolveIpfs(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[2:])
         else:
             urlArchivo = 'No NFT'
+            print('User: ' + update.effective_user.username + '\nNo NFT')
             mylcd.lcd_clear()
-            mylcd.lcd_display_string('No NFT', 1, 0)
+            mylcd.lcd_display_string(update.effective_user.username, 1, 0)
+            mylcd.lcd_display_string('No NFT', 2, 0)
 
 
         ############ Muestro el mensaje
@@ -127,20 +138,36 @@ def escuchoMensajes(update: Update, context: CallbackContext) -> None:
             update.message.reply_text('Name: ' + nameToken + '\n' + 'Amount: ' + amountToken + '\nImage: ' + urlArchivo + '\nDescription: ' + descriptionToken)
         except:
             update.message.reply_text('Name: ' + nameToken + '\n' + 'Amount: ' + amountToken + '\nAudio: ' + url1ArchivoAudio + '\nAudio Image: ' + url2ArchivoAudio + '\nDescription: ' + descriptionToken)
-                
-        
-        print('Token query')
+        print('User: ' + update.effective_user.username + '\nToken query:' + nameToken)
         mylcd.lcd_clear()
-        mylcd.lcd_display_string('Token', 1, 0)
+        mylcd.lcd_display_string(update.effective_user.username, 1, 0)
         mylcd.lcd_display_string(nameToken, 2, 0)
-
-    else:
-        ############ Unknown TOKEN WALLET
-        update.message.reply_text('Token o wallet invalid')
-        print('Token o wallet invalid')
+    
+    if searchOK == 200:
+        dataTokenSearch = dataTokenSearch.json()
+        totalTokenSearch = str(dataTokenSearch['total'])
+        update.message.reply_text('*{}*'.format('ℹ️ There are ' + totalTokenSearch +' tokens with this name'),  parse_mode=ParseMode.MARKDOWN)
+        print('User: ' + update.effective_user.username + '\nToken: ' + valorIntroducido)
         mylcd.lcd_clear()
-        mylcd.lcd_display_string('Unknown', 1, 0)
+        mylcd.lcd_display_string(update.effective_user.username, 1, 0)
         mylcd.lcd_display_string(valorIntroducido, 2, 0)
+        
+        if dataTokenSearch['total'] == 1:
+            dataToken = requests.get('https://api.ergoplatform.com/api/v0/assets/' + dataTokenSearch['items'][0]['id'] + '/issuingBox')
+            dataToken = dataToken.json()
+            nameToken = str(dataToken[0]['assets'][0]['name'])
+            amountToken = str(dataToken[0]['assets'][0]['amount'])
+            descriptionToken = toUtf8String(dataToken[0]['additionalRegisters']['R5'])[2:]
+            try:
+                urlArchivo = resolveIpfs(toUtf8String(dataToken[0]['additionalRegisters']['R9'])[2:])
+            except:
+                urlArchivo = 'No URL available in R9'
+            ############ Muestro el mensaje
+            update.message.reply_text('Name: ' + nameToken + '\nImage: ' + urlArchivo + '\nDescription: ' + descriptionToken)
+            print('User: ' + update.effective_user.username + '\nToken query: ' + nameToken)
+            mylcd.lcd_clear()
+            mylcd.lcd_display_string(update.effective_user.username, 1, 0)
+            mylcd.lcd_display_string(nameToken, 2, 0)
 
 def toUtf8String(hex):
     valorUTF8= '' 
